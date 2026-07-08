@@ -16,7 +16,6 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Use relative registration path to support GitHub Pages subdomains seamlessly
           const basePath = window.location.pathname.endsWith('/') 
             ? window.location.pathname 
             : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
@@ -32,6 +31,33 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- СКРИПТ АВТОМАТИЧЕСКОЙ ЗАГРУЗКИ ДАННЫХ ИЗ GOOGLE SHEETS -->
+    <script>
+      (function autoRefresh() {
+        // Ждём, пока React-приложение отрендерит кнопку "Обновить"
+        let attempts = 0;
+        const maxAttempts = 30; // максимум попыток (≈ 15 секунд)
+        const checkInterval = setInterval(() => {
+          attempts++;
+          // Ищем кнопку обновления по атрибуту id или по тексту/иконке
+          const refreshButton = document.querySelector(
+            '#header-sync-down, button:has(svg.lucide-refresh-cw), button:has(.lucide-refresh-cw)'
+          );
+
+          if (refreshButton) {
+            clearInterval(checkInterval);
+            // Небольшая задержка, чтобы все обработчики событий успели привязаться
+            setTimeout(() => {
+              refreshButton.click();
+              console.log('✅ Автоматическая синхронизация с Google Таблицей запущена');
+            }, 400);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            console.warn('⚠️ Кнопка обновления не найдена. Возможно, приложение не загрузилось.');
+          }
+        }, 500);
+      })();
+    </script>
   </body>
 </html>
-
